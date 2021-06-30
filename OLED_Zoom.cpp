@@ -1,5 +1,5 @@
 /*!
- * @file SSD1306_Zoom.cpp
+ * @file OLED_Zoom.cpp
  *
  * @mainpage Arduino library for monochrome OLEDs based on SSD1306 drivers.
  *
@@ -50,7 +50,7 @@
 #include <util/delay.h>
 #endif
 
-#include "SSD1306_Zoom.h"
+#include "OLED_Zoom.h"
 //#include "splash.h"
 #include <Adafruit_GFX.h>
 
@@ -172,13 +172,13 @@
             because other devices on the I2C bus might not be compatible
             with the faster rate. (Ignored if using pre-1.5.7 Arduino
             software, which operates I2C at a fixed 100 KHz.)
-    @return SSD1306_Zoom object.
+    @return OLED_Zoom object.
     @note   Call the object's begin() function before use -- buffer
             allocation is performed there!
 */
-SSD1306_Zoom::SSD1306_Zoom(uint8_t w, uint8_t h, SSD1306ZoomLevel zoom, TwoWire *twi,
-                           int8_t rst_pin, uint32_t clkDuring,
-                           uint32_t clkAfter)
+OLED_Zoom::OLED_Zoom(uint8_t w, uint8_t h, OLEDZoomLevel zoom, TwoWire *twi,
+                     int8_t rst_pin, uint32_t clkDuring,
+                     uint32_t clkAfter)
     : Adafruit_GFX(w / zoom, h / zoom), spi(NULL), wire(twi ? twi : &Wire), buffer(NULL),
       mosiPin(-1), clkPin(-1), dcPin(-1), csPin(-1), rstPin(rst_pin)
 #if ARDUINO >= 157
@@ -212,13 +212,13 @@ SSD1306_Zoom::SSD1306_Zoom(uint8_t w, uint8_t h, SSD1306ZoomLevel zoom, TwoWire 
     @param  cs_pin
             Chip-select pin (using Arduino pin numbering) for sharing the
             bus with other devices. Active low.
-    @return SSD1306_Zoom object.
+    @return OLED_Zoom object.
     @note   Call the object's begin() function before use -- buffer
             allocation is performed there!
 */
-SSD1306_Zoom::SSD1306_Zoom(uint8_t w, uint8_t h, SSD1306ZoomLevel zoom, int8_t mosi_pin,
-                           int8_t sclk_pin, int8_t dc_pin,
-                           int8_t rst_pin, int8_t cs_pin)
+OLED_Zoom::OLED_Zoom(uint8_t w, uint8_t h, OLEDZoomLevel zoom, int8_t mosi_pin,
+                     int8_t sclk_pin, int8_t dc_pin,
+                     int8_t rst_pin, int8_t cs_pin)
     : Adafruit_GFX(w / zoom, h / zoom), spi(NULL), wire(NULL), buffer(NULL),
       mosiPin(mosi_pin), clkPin(sclk_pin), dcPin(dc_pin), csPin(cs_pin),
       rstPin(rst_pin)
@@ -248,13 +248,13 @@ SSD1306_Zoom::SSD1306_Zoom(uint8_t w, uint8_t h, SSD1306ZoomLevel zoom, int8_t m
     @param  bitrate
             SPI clock rate for transfers to this display. Default if
             unspecified is 8000000UL (8 MHz).
-    @return SSD1306_Zoom object.
+    @return OLED_Zoom object.
     @note   Call the object's begin() function before use -- buffer
             allocation is performed there!
 */
-SSD1306_Zoom::SSD1306_Zoom(uint8_t w, uint8_t h, SSD1306ZoomLevel zoom, SPIClass *spi,
-                           int8_t dc_pin, int8_t rst_pin, int8_t cs_pin,
-                           uint32_t bitrate)
+OLED_Zoom::OLED_Zoom(uint8_t w, uint8_t h, OLEDZoomLevel zoom, SPIClass *spi,
+                     int8_t dc_pin, int8_t rst_pin, int8_t cs_pin,
+                     uint32_t bitrate)
     : Adafruit_GFX(w / zoom, h / zoom), spi(spi ? spi : &SPI), wire(NULL), buffer(NULL),
       mosiPin(-1), clkPin(-1), dcPin(dc_pin), csPin(cs_pin), rstPin(rst_pin)
 {
@@ -265,9 +265,9 @@ SSD1306_Zoom::SSD1306_Zoom(uint8_t w, uint8_t h, SSD1306ZoomLevel zoom, SPIClass
 }
 
 /*!
-    @brief  Destructor for SSD1306_Zoom object.
+    @brief  Destructor for OLED_Zoom object.
 */
-SSD1306_Zoom::~SSD1306_Zoom(void)
+OLED_Zoom::~OLED_Zoom(void)
 {
   if (buffer)
   {
@@ -280,7 +280,7 @@ SSD1306_Zoom::~SSD1306_Zoom(void)
 
 // Issue single byte out SPI, either soft or hardware as appropriate.
 // SPI transaction/selection must be performed in calling function.
-inline void SSD1306_Zoom::SPIwrite(uint8_t d)
+inline void OLED_Zoom::SPIwrite(uint8_t d)
 {
   if (spi)
   {
@@ -310,7 +310,7 @@ inline void SSD1306_Zoom::SPIwrite(uint8_t d)
 // Because command calls are often grouped, SPI transaction and selection
 // must be started/ended in calling function for efficiency.
 // This is a private function, not exposed (see ssd1306_command() instead).
-void SSD1306_Zoom::ssd1306_command1(uint8_t c)
+void OLED_Zoom::ssd1306_command1(uint8_t c)
 {
   if (wire)
   { // I2C
@@ -328,7 +328,7 @@ void SSD1306_Zoom::ssd1306_command1(uint8_t c)
 
 // Issue list of commands to SSD1306, same rules as above re: transactions.
 // This is a private function, not exposed.
-void SSD1306_Zoom::ssd1306_commandList(const uint8_t *c, uint8_t n)
+void OLED_Zoom::ssd1306_commandList(const uint8_t *c, uint8_t n)
 {
   if (wire)
   { // I2C
@@ -367,7 +367,7 @@ void SSD1306_Zoom::ssd1306_commandList(const uint8_t *c, uint8_t n)
             Command to issue (0x00 to 0xFF, see datasheet).
     @return None (void).
 */
-void SSD1306_Zoom::ssd1306_command(uint8_t c)
+void OLED_Zoom::ssd1306_command(uint8_t c)
 {
   TRANSACTION_START
   ssd1306_command1(c);
@@ -375,6 +375,14 @@ void SSD1306_Zoom::ssd1306_command(uint8_t c)
 }
 
 // ALLOCATE & INIT DISPLAY -------------------------------------------------
+
+/*!
+    @brief  Simplified begin function with only functions meaningfull to users
+*/
+bool OLED_Zoom::beginDefault(uint8_t addr, bool isSH1106)
+{
+  begin(SSD1306_SWITCHCAPVCC, addr, true, true, isSH1106);
+}
 
 /*!
     @brief  Allocate RAM for image buffer, initialize peripherals and pins.
@@ -406,13 +414,16 @@ void SSD1306_Zoom::ssd1306_command(uint8_t c)
             platforms where a nonstandard begin() function is available
             (e.g. a TwoWire interface on non-default pins, as can be done
             on the ESP8266 and perhaps others).
+    @param  isSH1106
+            Set to true if the OLED driver is SH1106 and not SSD1306
+            Usually this is the case for 1.3'' 128x64 OLEDs
     @return true on successful allocation/init, false otherwise.
             Well-behaved code should check the return value before
             proceeding.
     @note   MUST call this function before any drawing or updates!
 */
-bool SSD1306_Zoom::begin(uint8_t vcs, uint8_t addr, bool reset,
-                         bool periphBegin)
+bool OLED_Zoom::begin(uint8_t vcs, uint8_t addr, bool reset,
+                      bool periphBegin, bool isSH1106)
 {
 
   if ((!buffer) && !(buffer = (uint8_t *)malloc(WIDTH * ((HEIGHT + 7) / 8))))
@@ -429,6 +440,8 @@ bool SSD1306_Zoom::begin(uint8_t vcs, uint8_t addr, bool reset,
   }
 */
   vccstate = vcs;
+
+  SH1106 = isSH1106;
 
   // Setup pin directions
   if (wire)
@@ -498,7 +511,7 @@ bool SSD1306_Zoom::begin(uint8_t vcs, uint8_t addr, bool reset,
   ssd1306_command1((HEIGHT * zoomLevel) - 1);
 
   static const uint8_t PROGMEM init2[] = {SSD1306_SETDISPLAYOFFSET,   // 0xD3
-                                          0x0,                        // no offset
+                                          0x00,                        // no offset
                                           SSD1306_SETSTARTLINE | 0x0, // line #0
                                           SSD1306_CHARGEPUMP};        // 0x8D
   ssd1306_commandList(init2, sizeof(init2));
@@ -521,7 +534,7 @@ bool SSD1306_Zoom::begin(uint8_t vcs, uint8_t addr, bool reset,
   }
   else if (((WIDTH * zoomLevel) == 128) && ((HEIGHT * zoomLevel) == 64))
   {
-    comPins = 0x12;
+    comPins =  0x12;
     contrast = (vccstate == SSD1306_EXTERNALVCC) ? 0x9F : 0xCF;
   }
   else if (((WIDTH * zoomLevel) == 96) && ((HEIGHT * zoomLevel) == 16))
@@ -572,7 +585,7 @@ bool SSD1306_Zoom::begin(uint8_t vcs, uint8_t addr, bool reset,
             Follow up with a call to display(), or with other graphics
             commands as needed by one's own application.
 */
-void SSD1306_Zoom::drawPixel(int16_t x, int16_t y, uint16_t color)
+void OLED_Zoom::drawPixel(int16_t x, int16_t y, uint16_t color)
 {
   if ((x >= 0) && (x < width()) && (y >= 0) && (y < height()))
   {
@@ -614,7 +627,7 @@ void SSD1306_Zoom::drawPixel(int16_t x, int16_t y, uint16_t color)
             Follow up with a call to display(), or with other graphics
             commands as needed by one's own application.
 */
-void SSD1306_Zoom::clearDisplay(void)
+void OLED_Zoom::clearDisplay(void)
 {
   memset(buffer, 0, WIDTH * ((HEIGHT + 7) / 8));
 }
@@ -635,8 +648,8 @@ void SSD1306_Zoom::clearDisplay(void)
             Follow up with a call to display(), or with other graphics
             commands as needed by one's own application.
 */
-void SSD1306_Zoom::drawFastHLine(int16_t x, int16_t y, int16_t w,
-                                 uint16_t color)
+void OLED_Zoom::drawFastHLine(int16_t x, int16_t y, int16_t w,
+                              uint16_t color)
 {
   bool bSwap = false;
   switch (rotation)
@@ -669,8 +682,8 @@ void SSD1306_Zoom::drawFastHLine(int16_t x, int16_t y, int16_t w,
     drawFastHLineInternal(x, y, w, color);
 }
 
-void SSD1306_Zoom::drawFastHLineInternal(int16_t x, int16_t y, int16_t w,
-                                         uint16_t color)
+void OLED_Zoom::drawFastHLineInternal(int16_t x, int16_t y, int16_t w,
+                                      uint16_t color)
 {
 
   if ((y >= 0) && (y < HEIGHT))
@@ -729,8 +742,8 @@ void SSD1306_Zoom::drawFastHLineInternal(int16_t x, int16_t y, int16_t w,
             Follow up with a call to display(), or with other graphics
             commands as needed by one's own application.
 */
-void SSD1306_Zoom::drawFastVLine(int16_t x, int16_t y, int16_t h,
-                                 uint16_t color)
+void OLED_Zoom::drawFastVLine(int16_t x, int16_t y, int16_t h,
+                              uint16_t color)
 {
   bool bSwap = false;
   switch (rotation)
@@ -763,8 +776,8 @@ void SSD1306_Zoom::drawFastVLine(int16_t x, int16_t y, int16_t h,
     drawFastVLineInternal(x, y, h, color);
 }
 
-void SSD1306_Zoom::drawFastVLineInternal(int16_t x, int16_t __y,
-                                         int16_t __h, uint16_t color)
+void OLED_Zoom::drawFastVLineInternal(int16_t x, int16_t __y,
+                                      int16_t __h, uint16_t color)
 {
 
   if ((x >= 0) && (x < WIDTH))
@@ -886,7 +899,7 @@ void SSD1306_Zoom::drawFastVLineInternal(int16_t x, int16_t __y,
     @note   Reads from buffer contents; may not reflect current contents of
             screen if display() has not been called.
 */
-bool SSD1306_Zoom::getPixel(int16_t x, int16_t y)
+bool OLED_Zoom::getPixel(int16_t x, int16_t y)
 {
   if ((x >= 0) && (x < width()) && (y >= 0) && (y < height()))
   {
@@ -916,7 +929,7 @@ bool SSD1306_Zoom::getPixel(int16_t x, int16_t y)
     @return Pointer to an unsigned 8-bit array, column-major, columns padded
             to full byte boundary if needed.
 */
-uint8_t *SSD1306_Zoom::getBuffer(void) { return buffer; }
+uint8_t *OLED_Zoom::getBuffer(void) { return buffer; }
 
 // REFRESH DISPLAY ---------------------------------------------------------
 
@@ -927,17 +940,44 @@ uint8_t *SSD1306_Zoom::getBuffer(void) { return buffer; }
             called. Call after each graphics command, or after a whole set
             of graphics commands, as best needed by one's own application.
 */
-void SSD1306_Zoom::display(void)
+void OLED_Zoom::display(void)
 {
+  displayArea(0, 0, WIDTH, HEIGHT);
+}
+
+void OLED_Zoom::displayArea(uint8_t x1, uint8_t y1, uint8_t aWidth, uint8_t aHeight)
+{
+  // we calculate maximum coordinates, and make sure they are inside the buffer size
+  uint8_t x2 = min(x1 + aWidth, WIDTH - 1);
+  uint8_t y2 = min(y1 + aHeight, HEIGHT - 1);
+
+  // if we have a negative dimension, there is nothing to display so we return
+  if ((x1 > x2) || (y1 > y2))
+  {
+    return;
+  }
+
+  // refreshes the full display
+  // As vertical position must be aligned with memory pages (8 physical pixels) we must convert buffer pixels to hardware pixels,
+  //  round to pages then convert back to buffer pixels.
+  uint8_t yRowStart = (y1 * zoomLevel) / 8;   // we round to lower page
+  yRowStart = (yRowStart * 8) / zoomLevel;    // we convert back to buffer pixels
+  uint8_t yRowEnd = (y2 * zoomLevel + 7) / 8; // we round to higher page
+  yRowEnd = (yRowEnd * 8) / zoomLevel - 1;    // we convert back to buffer pixels
+
   TRANSACTION_START
-  static const uint8_t PROGMEM dlist1[] = {
-      SSD1306_PAGEADDR,
-      0,    // Page start address
-      0xFF, // Page end (not really, but works here)
-      SSD1306_COLUMNADDR,
-      0}; // Column start address
-  ssd1306_commandList(dlist1, sizeof(dlist1));
-  ssd1306_command1((WIDTH * zoomLevel) - 1); // Column end address
+  if (!SH1106)
+  {
+    uint8_t dlist1[] = {
+        SSD1306_PAGEADDR,
+        (y1 * zoomLevel) / 8, // Page start address
+        (y2 * zoomLevel) / 8,                 // Page end (not really, but works here)
+        SSD1306_COLUMNADDR,
+        x1 * zoomLevel,                        // Column start address
+        (x2 + 1) * zoomLevel - 1}; // Column end address
+
+    ssd1306_commandList(dlist1, sizeof(dlist1));
+  }
 
 #if defined(ESP8266)
   // ESP8266 needs a periodic yield() call to avoid watchdog reset.
@@ -950,11 +990,11 @@ void SSD1306_Zoom::display(void)
 #endif
 
   uint8_t *ptr = buffer;
+  ptr += (yRowStart * WIDTH) / 8; // Initialize pointer at starting row
   uint8_t *ptrWork;
   uint8_t byteToSend;
   uint8_t byteToProcess;
   uint8_t bytesOut;
-  uint8_t multiplier;
 
   bool hasData = false;
 
@@ -981,54 +1021,74 @@ void SSD1306_Zoom::display(void)
     // send data command over SPI
     SSD1306_MODE_DATA
   }
-
   // we loop for each row of bytes
-  for (uint8_t yRow = 0; yRow < HEIGHT / 8; yRow++)
+  for (uint8_t yRow = 0; yRow <= (yRowEnd - yRowStart) / 8; yRow++)
   {
-
     // We repeat each row/line "zoom" times
     for (uint8_t yRepeat = 0; yRepeat < zoomLevel; yRepeat++)
     {
-
+       // Specific for SH1106 : we must reset the row/page and column for each vertical row
+      //  as this driver is not moving on to next row like the SSD1306...
+    if (SH1106)
+    {
+      wire->endTransmission();
+      ssd1306_command1(0xB0 + (y1 * zoomLevel) / 8 + yRow * zoomLevel + yRepeat); // Set row
+      ssd1306_command1(SH1106_SETLOWCOLUMNSTART + (x1 * zoomLevel & 0x0F)); // Set lower bits of start column index   SH1106_SETCOLUMNLOWBITS +
+      ssd1306_command1(SH1106_SETCOLUMNHIGHBITS + ((SH1106_SETLOWCOLUMNSTART + x1 * zoomLevel) >> 4));  // Set higher bits of start column index
+      wire->beginTransmission(i2caddr);
+      WIRE_WRITE((uint8_t)0x40);
+      bytesOut = 1;
+    }
+ 
       // For each column on screen
-      for (uint8_t xCol = 0; xCol < WIDTH; xCol++)
+      for (uint8_t xCol = x1; xCol <= x2; xCol++)
       {
-
         // we set working pointer to start row position
         ptrWork = ptr + xCol;
 
         byteToProcess = *ptrWork;
-        // we loop zoom time
-        // Mask byte to keep only relevant bits
-        byteToProcess = byteToProcess & (valForShift << (zShiftMultiplicator * yRepeat));
-        // Shift right to move relevant bits to lowest order
-        byteToProcess = byteToProcess >> (zShiftMultiplicator * yRepeat);
-        // Now we need to convert to a byte to send, we use SSD1306_ZoomBytes4/SSD1306_ZoomBytes2 to save bit manipulations
-        if (zoomLevel == 4)
+
+        if (zoomLevel == OLEDZoomNoZoom)
         {
-          byteToProcess = SSD1306_ZoomBytes4[byteToProcess];
-        }
-        else if (zoomLevel == 2)
-        {
-          byteToSend = SSD1306_ZoomBytes2[byteToProcess];
+          byteToSend = byteToProcess;
         }
         else
         {
-          // For zoom = 8 value is either 0 or 1
-          byteToProcess = byteToProcess ? B01111110 : B00000000;
+
+          // Mask byte to keep only relevant bits
+          byteToProcess = byteToProcess & (valForShift << (zShiftMultiplicator * yRepeat));
+          // Shift right to move relevant bits to lowest order
+          byteToProcess = byteToProcess >> (zShiftMultiplicator * yRepeat);
+          // Now we need to convert to a byte to send, we use OLED_ZoomBytes4/OLED_ZoomBytes2 to save bit manipulations
+          if (zoomLevel == 4)
+          {
+            byteToProcess = OLED_ZoomBytes4[byteToProcess];
+          }
+          else if (zoomLevel == 2)
+          {
+            byteToSend = OLED_ZoomBytes2[byteToProcess];
+          }
+          else
+          {
+            // For zoom = 8 value is either 0 or 1
+            byteToProcess = byteToProcess ? B01111110 : B00000000;
+          }
         }
         for (int xRepeat = 0; xRepeat < zoomLevel; xRepeat++)
         {
-          if (zoomLevel == 8) {
+          if (zoomLevel == 8)
+          {
             byteToSend = B00000000;
-            if (byteToProcess && (xRepeat>0) && (xRepeat < 7))
-             {
-               byteToSend = (xRepeat == 1 || xRepeat == 6) ? B00111100 : byteToProcess;
-             } 
+            if (byteToProcess && (xRepeat > 0) && (xRepeat < 7))
+            {
+              byteToSend = (xRepeat == 1 || xRepeat == 6) ? B00111100 : byteToProcess;
+            }
           }
-          else if (zoomLevel == 4) {
+          else if (zoomLevel == 4)
+          {
             byteToSend = byteToProcess;
-            if (byteToSend && (xRepeat == 0 || xRepeat == zoomLevel-1)) {
+            if (byteToSend && (xRepeat == 0 || xRepeat == zoomLevel - 1))
+            {
               byteToSend = byteToSend & B01100110;
             }
           }
@@ -1066,12 +1126,180 @@ void SSD1306_Zoom::display(void)
 #endif
 }
 
-void SSD1306_Zoom::writeDisplay(void)
+void OLED_Zoom::displayBitmap(uint8_t x, uint8_t y, const uint8_t bitmap[], uint8_t bWidth, uint8_t bHeight, OLEDZoomLevel zoom, bool mirror, bool invert)
+{
+
+  uint8_t byteIndex = 0;
+  uint8_t byteToSend;
+  uint8_t byteToProcess;
+  uint8_t bytesOut = 0;
+
+  bool hasData = false;
+
+  // Real Y position, we align to start of page below
+  uint8_t realY = (y / 8) * 8;
+  // Calculate the real height of the bitmap we will display on screen: trim at maximum coordinate of the screen
+  uint8_t realHeight = min(realY + bHeight * zoom, (HEIGHT * zoomLevel) - 1);
+  realHeight = (realHeight - realY) / zoom;
+  uint8_t widthInBytes = (bWidth + 7) / 8;
+
+  TRANSACTION_START
+  // If not SH1106 we are using SSD1306 and we initialize start/end rows & columns only once
+  if (!SH1106)
+  {
+    uint8_t dlist1[] = {
+        SSD1306_PAGEADDR,
+        realY / 8,                       // Page start address
+        (realY + realHeight * zoom) / 8, // We cannot have an end page higher than the max page of the screen
+        SSD1306_COLUMNADDR,
+        x,                                            // Column start address
+        min(x + bWidth * zoom, WIDTH * zoomLevel) - 1 // We cannot have an end column higher than the max column of the screen
+    };
+    ssd1306_commandList(dlist1, sizeof(dlist1));
+  }
+#if defined(ESP8266)
+  // ESP8266 needs a periodic yield() call to avoid watchdog reset.
+  // With the limited size of SSD1306 displays, and the fast bitrate
+  // being used (1 MHz or more), I think one yield() immediately before
+  // a screen write and one immediately after should cover it.  But if
+  // not, if this becomes a problem, yields() might be added in the
+  // 32-byte transfer condition below.
+  yield();
+#endif
+
+  // If I2C we initialize transmission and send data command
+  if (wire)
+  { // I2C
+    wire->beginTransmission(i2caddr);
+    WIRE_WRITE((uint8_t)0x40);
+    bytesOut = 1;
+  }
+  else
+  {
+    // send data command over SPI
+    SSD1306_MODE_DATA
+  }
+  for (uint8_t yRow = 0; yRow < (realHeight + 1) / (8 / zoom); yRow++)
+  {
+    // SH1106 must receive new start row & column at each horizontal loop
+    if (SH1106)
+    {
+      wire->endTransmission();
+      ssd1306_command1(0xB0 + realY / 8 + yRow); // Set row
+      ssd1306_command1((x + SH1106_SETLOWCOLUMNSTART) & 0x0F);                           // Set lower bits of start column index   SH1106_SETCOLUMNLOWBITS +
+      ssd1306_command1(SH1106_SETCOLUMNHIGHBITS + ((x + SH1106_SETLOWCOLUMNSTART)>> 4));  // Set higher bits of start column index
+      wire->beginTransmission(i2caddr);
+      WIRE_WRITE((uint8_t)0x40);
+      bytesOut = 1;
+    }
+
+    for (uint8_t xColumn = 0; xColumn < widthInBytes; xColumn++)
+    {
+      // For each horizontal byte, we must generate 8 bytes
+      for (uint8_t bitIndex = 0; bitIndex < 8 && (xColumn * 8 + bitIndex < bWidth) ; bitIndex++)   
+      {
+        byteToProcess = 0;
+        // We read 1,2,4,8 bits depending on zoom level, write the bit values in byteToProcess
+        for (int8_t yRepeat = (8 / zoom) - 1; yRepeat >= 0; yRepeat--)
+        {
+          byteToProcess <<= 1;          // we read from the bottom and move up one bit at each row
+          if (yRow + yRepeat < bHeight) // we should not try to read outside of the bitmap data !
+          {
+            byteToProcess += bitRead(pgm_read_byte(&bitmap[widthInBytes * ((yRow * (8 / zoom)) + yRepeat) + (mirror ? widthInBytes - 1 - xColumn : xColumn)]), mirror ? bitIndex : 7 - bitIndex);
+          }
+        }
+
+        // Depending on zoom level, we calculate the full output byte to send to the display
+        if (zoom == OLEDZoomNoZoom)
+        {
+          byteToSend = byteToProcess;
+        }
+        else
+        {
+          // Now we need to convert to a byte to send, we use OLED_ZoomBytes4/OLED_ZoomBytes2 to save bit manipulations
+          if (zoom == OLEDZoomX4)
+          {
+            byteToProcess = OLED_ZoomBytes4[byteToProcess];
+          }
+          else if (zoom == OLEDZoomX2)
+          {
+            byteToSend = OLED_ZoomBytes2[byteToProcess];
+          }
+          else
+          {
+            // For zoom = 8 value is either 0 or 1
+            byteToProcess = byteToProcess ? B01111110 : B00000000;
+          }
+        }
+        // Now we have the full byte, we must repeat it horizontally zoom times
+        for (uint8_t xRepeat = 0; xRepeat < zoom; xRepeat++)
+        {
+          // We should not send byte if the x coordinate is outside of screen
+          //  this can happen if x is not aligned with a byte/multiple of 8
+          if (x + (xColumn * 8 + bitIndex) * zoom + xRepeat < WIDTH * zoomLevel)
+          {
+            if (zoom == 8)
+            {
+              byteToSend = B00000000;
+              if (byteToProcess && (xRepeat > 0) && (xRepeat < 7))
+              {
+                byteToSend = (xRepeat == 1 || xRepeat == 6) ? B00111100 : byteToProcess;
+              }
+            }
+            else if (zoom == 4)
+            {
+              if (byteToProcess && (xRepeat == 0 || xRepeat == zoom - 1))
+              {
+                byteToSend = byteToProcess & B01100110;
+              }
+              else
+              {
+                byteToSend = byteToProcess;
+              }
+            }
+            if (invert)
+            {
+              byteToSend = ~byteToSend;
+            }
+            if (wire)
+            { // I2C
+              if (bytesOut >= WIRE_MAX)
+              {
+                wire->endTransmission();
+                wire->beginTransmission(i2caddr);
+                WIRE_WRITE((uint8_t)0x40);
+                bytesOut = 1;
+              }
+              WIRE_WRITE(byteToSend);
+              bytesOut++;
+            }
+            else
+            { // SPI
+              SPIwrite(byteToSend);
+            }
+          }
+        }
+      }
+    }
+  }
+  if (wire)
+  { // I2C
+    wire->endTransmission();
+  }
+
+  TRANSACTION_END
+
+#if defined(ESP8266)
+  yield();
+#endif
+}
+
+void OLED_Zoom::writeDisplay(void)
 {
   display();
 }
 
-void SSD1306_Zoom::clear(void)
+void OLED_Zoom::clear(void)
 {
   clearDisplay();
 }
@@ -1087,7 +1315,7 @@ void SSD1306_Zoom::clear(void)
     @return None (void).
 */
 // To scroll the whole display, run: display.startscrollright(0x00, 0x0F)
-void SSD1306_Zoom::startscrollright(uint8_t start, uint8_t stop)
+void OLED_Zoom::startscrollright(uint8_t start, uint8_t stop)
 {
   TRANSACTION_START
   static const uint8_t PROGMEM scrollList1a[] = {
@@ -1111,7 +1339,7 @@ void SSD1306_Zoom::startscrollright(uint8_t start, uint8_t stop)
     @return None (void).
 */
 // To scroll the whole display, run: display.startscrollleft(0x00, 0x0F)
-void SSD1306_Zoom::startscrollleft(uint8_t start, uint8_t stop)
+void OLED_Zoom::startscrollleft(uint8_t start, uint8_t stop)
 {
   TRANSACTION_START
   static const uint8_t PROGMEM scrollList2a[] = {SSD1306_LEFT_HORIZONTAL_SCROLL,
@@ -1135,7 +1363,7 @@ void SSD1306_Zoom::startscrollleft(uint8_t start, uint8_t stop)
     @return None (void).
 */
 // display.startscrolldiagright(0x00, 0x0F)
-void SSD1306_Zoom::startscrolldiagright(uint8_t start, uint8_t stop)
+void OLED_Zoom::startscrolldiagright(uint8_t start, uint8_t stop)
 {
   TRANSACTION_START
   static const uint8_t PROGMEM scrollList3a[] = {
@@ -1162,7 +1390,7 @@ void SSD1306_Zoom::startscrolldiagright(uint8_t start, uint8_t stop)
     @return None (void).
 */
 // To scroll the whole display, run: display.startscrolldiagleft(0x00, 0x0F)
-void SSD1306_Zoom::startscrolldiagleft(uint8_t start, uint8_t stop)
+void OLED_Zoom::startscrolldiagleft(uint8_t start, uint8_t stop)
 {
   TRANSACTION_START
   static const uint8_t PROGMEM scrollList4a[] = {
@@ -1184,7 +1412,7 @@ void SSD1306_Zoom::startscrolldiagleft(uint8_t start, uint8_t stop)
     @brief  Cease a previously-begun scrolling action.
     @return None (void).
 */
-void SSD1306_Zoom::stopscroll(void)
+void OLED_Zoom::stopscroll(void)
 {
   TRANSACTION_START
   ssd1306_command1(SSD1306_DEACTIVATE_SCROLL);
@@ -1206,7 +1434,7 @@ void SSD1306_Zoom::stopscroll(void)
             enabled, drawing SSD1306_BLACK (value 0) pixels will actually draw
    white, SSD1306_WHITE (value 1) will draw black.
 */
-void SSD1306_Zoom::invertDisplay(bool i)
+void OLED_Zoom::invertDisplay(bool i)
 {
   TRANSACTION_START
   ssd1306_command1(i ? SSD1306_INVERTDISPLAY : SSD1306_NORMALDISPLAY);
@@ -1221,7 +1449,7 @@ void SSD1306_Zoom::invertDisplay(bool i)
     @note   This has an immediate effect on the display, no need to call the
             display() function -- buffer contents are not changed.
 */
-void SSD1306_Zoom::dim(bool dim)
+void OLED_Zoom::dim(bool dim)
 {
   // the range of contrast to too small to be really useful
   // it is useful to dim the display

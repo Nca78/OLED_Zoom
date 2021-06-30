@@ -1,5 +1,5 @@
 /*!
- * @file SSD1306_Zoom.h
+ * @file OLED_Zoom.h
  *
  * 2021/06/09 Nca78
  *   "Zoom" function added to simulate led panels while having a much lower RAM footprint
@@ -8,7 +8,7 @@
  *     - added zoom parameter in remaining constructors and _zoom private variable
  *     - create Adafruit_GFX underlying object with dimensions divided by the zoom in the constructors
  *     - updated display method to convert a bit to multiple OLED pixels only when sending data to the oled
- *     - added SSD1306_ZoomBytes2 and SSD1306_ZoomBytes4
+ *     - added OLED_ZoomBytes2 and OLED_ZoomBytes4
  *     - temporary add functions writeDisplay and clear for compatibility with Otto Eyes
  * 
  *  Original header from Adafruit below:
@@ -34,14 +34,10 @@
  *
  */
 
-#ifndef _SSD1306_Zoom_H_
-#define _SSD1306_Zoom_H_
+#ifndef _OLED_Zoom_H_
+#define _OLED_Zoom_H_
 
-// ONE of the following three lines must be #defined:
-//#define SSD1306_128_64 ///< DEPRECTAED: old way to specify 128x64 screen
-#define SSD1306_128_32 ///< DEPRECATED: old way to specify 128x32 screen
-//#define SSD1306_96_16  ///< DEPRECATED: old way to specify 96x16 screen
-// This establishes the screen dimensions in old SSD1306_Zoom sketches
+// This establishes the screen dimensions in old OLED_Zoom sketches
 // (NEW CODE SHOULD IGNORE THIS, USE THE CONSTRUCTORS THAT ACCEPT WIDTH
 // AND HEIGHT ARGUMENTS).
 
@@ -72,7 +68,7 @@ typedef uint32_t PortMask;
 /// They can be disabled by predefining this macro before including the Adafruit
 /// header client code will then need to be modified to use the scoped enum
 /// values directly
-#ifndef NO_SSD1306_Zoom_COLOR_COMPATIBILITY
+#ifndef NO_OLED_Zoom_COLOR_COMPATIBILITY
 #define BLACK SSD1306_BLACK     ///< Draw 'off' pixels
 #define WHITE SSD1306_WHITE     ///< Draw 'on' pixels
 #define INVERSE SSD1306_INVERSE ///< Invert pixels
@@ -118,55 +114,48 @@ typedef uint32_t PortMask;
 #define SSD1306_ACTIVATE_SCROLL 0x2F                      ///< Start scroll
 #define SSD1306_SET_VERTICAL_SCROLL_AREA 0xA3             ///< Set scroll range
 
-// Deprecated size stuff for backwards compatibility with old sketches
-#if defined SSD1306_128_64
-#define SSD1306_LCDWIDTH 128 ///< DEPRECATED: width w/SSD1306_128_64 defined
-#define SSD1306_LCDHEIGHT 64 ///< DEPRECATED: height w/SSD1306_128_64 defined
-#endif
-#if defined SSD1306_128_32
-#define SSD1306_LCDWIDTH 128 ///< DEPRECATED: width w/SSD1306_128_32 defined
-#define SSD1306_LCDHEIGHT 32 ///< DEPRECATED: height w/SSD1306_128_32 defined
-#endif
-#if defined SSD1306_96_16
-#define SSD1306_LCDWIDTH 96  ///< DEPRECATED: width w/SSD1306_96_16 defined
-#define SSD1306_LCDHEIGHT 16 ///< DEPRECATED: height w/SSD1306_96_16 defined
-#endif
+// ADDITIONAL DEFINES FOR SH1106 compatibility
+#define SH1106_SETLOWCOLUMNSTART 0x02
+#define SH1106_SETCOLUMNHIGHBITS 0x10
 
-
-enum SSD1306ZoomLevel {
-  SSD1306ZoomX2 = 2,
-  SSD1306ZoomX4 = 4,
-  SSD1306ZoomX8 = 8
+enum OLEDZoomLevel {
+  OLEDZoomNoZoom = 1,
+  OLEDZoomX2 = 2,
+  OLEDZoomX4 = 4,
+  OLEDZoomX8 = 8
 };
 
 
 // Possible output values for x2 zoom (based of 4 bits of data in original byte)
-const uint8_t SSD1306_ZoomBytes2[] = {B00000000, B00000011, B00001100, B00001111, B00110000, B00110011, B00111100, B00111111, B11000000, B11000011, B11001100, B11001111, B11110000, B11110011, B11111100, B11111111};
+const uint8_t OLED_ZoomBytes2[] = {B00000000, B00000011, B00001100, B00001111, B00110000, B00110011, B00111100, B00111111, B11000000, B11000011, B11001100, B11001111, B11110000, B11110011, B11111100, B11111111};
 // Possible output values for x4 zoom (based of 2 bits of data in original byte)
-const uint8_t SSD1306_ZoomBytes4[] = {B00000000, B00001111, B11110000, B11111111};
+const uint8_t OLED_ZoomBytes4[] = {B00000000, B00001111, B11110000, B11111111};
 
 
 /*!
     @brief  Class that stores state and functions for interacting with
             SSD1306 OLED displays.
 */
-class SSD1306_Zoom : public Adafruit_GFX
+class OLED_Zoom : public Adafruit_GFX
 {
 public:
   // NEW CONSTRUCTORS -- recommended for new projects
-  SSD1306_Zoom(uint8_t w, uint8_t h, SSD1306ZoomLevel zoom, TwoWire *twi = &Wire,
+  OLED_Zoom(uint8_t w, uint8_t h, OLEDZoomLevel zoom, TwoWire *twi = &Wire,
                int8_t rst_pin = -1, uint32_t clkDuring = 400000UL,
                uint32_t clkAfter = 100000UL);
-  SSD1306_Zoom(uint8_t w, uint8_t h, SSD1306ZoomLevel zoom, int8_t mosi_pin, int8_t sclk_pin,
+  OLED_Zoom(uint8_t w, uint8_t h, OLEDZoomLevel zoom, int8_t mosi_pin, int8_t sclk_pin,
                int8_t dc_pin, int8_t rst_pin, int8_t cs_pin);
-  SSD1306_Zoom(uint8_t w, uint8_t h, SSD1306ZoomLevel zoom, SPIClass *spi, int8_t dc_pin,
+  OLED_Zoom(uint8_t w, uint8_t h, OLEDZoomLevel zoom, SPIClass *spi, int8_t dc_pin,
                int8_t rst_pin, int8_t cs_pin, uint32_t bitrate = 8000000UL);
 
-  ~SSD1306_Zoom(void);
+  ~OLED_Zoom(void);
 
   bool begin(uint8_t switchvcc = SSD1306_SWITCHCAPVCC, uint8_t i2caddr = 0,
-             bool reset = true, bool periphBegin = true);
+             bool reset = true, bool periphBegin = true, bool isSH1106 = false);
+  bool beginDefault(uint8_t addr = 0, bool isSH1106 = false);
   void display(void);
+  void displayArea(uint8_t x1, uint8_t y1, uint8_t aWidth, uint8_t aHeight);
+  void displayBitmap(uint8_t x, uint8_t y, const uint8_t bitmap[], uint8_t bWidth, uint8_t bHeight, OLEDZoomLevel zoom, bool mirror, bool invert);
   void clearDisplay(void);
   void invertDisplay(bool i);
   void dim(bool dim);
@@ -197,6 +186,7 @@ private:
   uint8_t *buffer;
   int8_t i2caddr, vccstate, page_end;
   int8_t mosiPin, clkPin, dcPin, csPin, rstPin;
+  bool SH1106;
 #ifdef HAVE_PORTREG
   PortReg *mosiPort, *clkPort, *dcPort, *csPort;
   PortMask mosiPinMask, clkPinMask, dcPinMask, csPinMask;
@@ -214,4 +204,4 @@ protected:
 #endif
 };
 
-#endif // _SSD1306_Zoom_H_
+#endif // _OLED_Zoom_H_
